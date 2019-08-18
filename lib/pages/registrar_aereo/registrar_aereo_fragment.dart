@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:date_format/date_format.dart';
@@ -53,49 +55,87 @@ class RegistrarAereoState extends State<RegistrarAereo> {
   int idAerista;
   // String selectedAerista;
 
-  List<DropdownMenuItem<String>> _dropDownMenuItemsMiniFincas;
-  List<DropdownMenuItem<String>> _dropDownMenuItemsMiniFincasSecciones;
-  String _selectedMiniFinca;
-  String _selectedMiniFincaSeccion;
+  MiniFincas _currentMiniFinca;
 
-  List<DropdownMenuItem<String>> buildAndGetDropDownMenuItemsMiniFincas(
-      List miniFincas) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (MiniFincas miniFinca in miniFincas) {
-      items.add(DropdownMenuItem(
-          value: miniFinca.miniFinca, child: Text(miniFinca.miniFinca)));
+  Future<List<MiniFincas>> _fetchMiniFincas() async {
+    var response = await http.get('http://192.168.1.9:3000/minifincas/list');
+    if (response.statusCode == 200) {
+      final items = json.decode(response.body);
+      var miniFincasJson = items['miniFincas'] as List;
+      List<MiniFincas> listOfMiniFincas = miniFincasJson.map<MiniFincas>((json) {
+        return MiniFincas.fromJson(json);
+      }).toList();
+      // print(listOfMiniFincas[0].nombre_mini_finca);
+      // _currentMiniFinca =  listOfMiniFincas[0];
+      return listOfMiniFincas;
+    } else {
+      throw Exception('Error de conexion de red');
     }
-    return items;
   }
 
-  void changedDropDownItemMiniFincsa(String selectedMiniFinca) {
-    setState(() {
-      _selectedMiniFinca = selectedMiniFinca;
-      _dropDownMenuItemsMiniFincasSecciones =
-          buildAndGetDropDownMenuItemsMiniFincasSecciones(
-              arraySeccionMiniFincas);
-      _selectedMiniFincaSeccion =
-          _dropDownMenuItemsMiniFincasSecciones[0].value;
-    });
-  }
+  SeccionMiniFinca _currentSeccionMiniFinca;
 
-  List<DropdownMenuItem<String>>
-      buildAndGetDropDownMenuItemsMiniFincasSecciones(List secciones) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (SeccionMiniFinca seccion in secciones) {
-      if (seccion.miniFinca == _selectedMiniFinca) {
-        items.add(DropdownMenuItem(
-            value: seccion.seccion, child: Text(seccion.seccion)));
-      }
+  Future<List<SeccionMiniFinca>> _fetchSeccionMiniFincas(String filter) async {
+    var map = new Map<String, dynamic>();
+    map["filter"] = filter;
+    var response = await http.post('http://192.168.1.9:3000/seccionesmf/listfilter', body: map);
+    if (response.statusCode == 200) {
+      final items = json.decode(response.body);
+      var miniFincasJson = items['secciones'] as List;
+      List<SeccionMiniFinca> listOfSeccionMiniFincas = miniFincasJson.map<SeccionMiniFinca>((json) {
+        return SeccionMiniFinca.fromJson(json);
+      }).toList();
+      // _currentSeccionMiniFinca = listOfSeccionMiniFincas[0];
+      return listOfSeccionMiniFincas;
+    } else {
+      throw Exception('Error de conexion de red');
     }
-    return items;
   }
 
-  void changedDropDownItemMiniFincsaSecciones(String selectedMiniFincaSeccion) {
-    setState(() {
-      _selectedMiniFincaSeccion = selectedMiniFincaSeccion;
-    });
-  }
+
+  // List<DropdownMenuItem<String>> _dropDownMenuItemsMiniFincas;
+  // List<DropdownMenuItem<String>> _dropDownMenuItemsMiniFincasSecciones;
+  // String _selectedMiniFinca;
+  // String _selectedMiniFincaSeccion;
+
+  // List<DropdownMenuItem<String>> buildAndGetDropDownMenuItemsMiniFincas(
+  //     List miniFincas) {
+  //   List<DropdownMenuItem<String>> items = new List();
+  //   for (MiniFincas miniFinca in miniFincas) {
+  //     items.add(DropdownMenuItem(
+  //         value: miniFinca.miniFinca, child: Text(miniFinca.miniFinca)));
+  //   }
+  //   return items;
+  // }
+
+  // void changedDropDownItemMiniFincsa(String selectedMiniFinca) {
+  //   setState(() {
+  //     _selectedMiniFinca = selectedMiniFinca;
+  //     _dropDownMenuItemsMiniFincasSecciones =
+  //         buildAndGetDropDownMenuItemsMiniFincasSecciones(
+  //             arraySeccionMiniFincas);
+  //     _selectedMiniFincaSeccion =
+  //         _dropDownMenuItemsMiniFincasSecciones[0].value;
+  //   });
+  // }
+
+  // List<DropdownMenuItem<String>>
+  //     buildAndGetDropDownMenuItemsMiniFincasSecciones(List secciones) {
+  //   List<DropdownMenuItem<String>> items = new List();
+  //   for (SeccionMiniFinca seccion in secciones) {
+  //     if (seccion.miniFinca == _selectedMiniFinca) {
+  //       items.add(DropdownMenuItem(
+  //           value: seccion.seccion, child: Text(seccion.seccion)));
+  //     }
+  //   }
+  //   return items;
+  // }
+
+  // void changedDropDownItemMiniFincsaSecciones(String selectedMiniFincaSeccion) {
+  //   setState(() {
+  //     _selectedMiniFincaSeccion = selectedMiniFincaSeccion;
+  //   });
+  // }
 
   Future<void> createViajeAereo(String url, {Map body}) async {
     try {
@@ -123,13 +163,13 @@ class RegistrarAereoState extends State<RegistrarAereo> {
     countCintaNaranjaController.text = conteoCintaNaranja.toString();
     countCintaAzulController.text = conteoCintaAzul.toString();
 
-    _dropDownMenuItemsMiniFincas =
-        buildAndGetDropDownMenuItemsMiniFincas(arrayMiniFincas);
-    _selectedMiniFinca = _dropDownMenuItemsMiniFincas[0].value;
+    // _dropDownMenuItemsMiniFincas =
+    //     buildAndGetDropDownMenuItemsMiniFincas(arrayMiniFincas);
+    // _selectedMiniFinca = _dropDownMenuItemsMiniFincas[0].value;
 
-    _dropDownMenuItemsMiniFincasSecciones =
-        buildAndGetDropDownMenuItemsMiniFincasSecciones(arraySeccionMiniFincas);
-    _selectedMiniFincaSeccion = _dropDownMenuItemsMiniFincasSecciones[0].value;
+    // _dropDownMenuItemsMiniFincasSecciones =
+    //     buildAndGetDropDownMenuItemsMiniFincasSecciones(arraySeccionMiniFincas);
+    // _selectedMiniFincaSeccion = _dropDownMenuItemsMiniFincasSecciones[0].value;
 
     DateTime now = DateTime.now();
     horaAereoController.text = formatDate(now, [hh, ':', nn, ' ', am]);
@@ -214,12 +254,34 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     new Text("Mini Fincas:"),
-                    new DropdownButton(
-                      value: _selectedMiniFinca,
-                      items: _dropDownMenuItemsMiniFincas,
-                      isExpanded: true,
-                      onChanged: changedDropDownItemMiniFincsa,
-                    )
+                    FutureBuilder<List<MiniFincas>>(
+                future: _fetchMiniFincas(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<MiniFincas>> snapshot) {
+                  if (!snapshot.hasData) return CircularProgressIndicator();
+                  return new DropdownButton<MiniFincas>(
+                    items: snapshot.data
+                        .map((miniFinca) => DropdownMenuItem<MiniFincas>(
+                              child: Text(miniFinca.nombre_mini_finca),
+                              value: miniFinca,
+                            ))
+                        .toList(),
+                    onChanged: (MiniFincas value) {
+                      setState(() {
+                        _currentMiniFinca = value;
+                      });
+                    },
+                    isExpanded: true,
+                    //value: _currentMiniFinca,
+                    hint: _currentMiniFinca == null ? Text("Seleccione una mini finca") : Text(_currentMiniFinca.nombre_mini_finca),
+                  );
+                }),
+                    // new DropdownButton(
+                    //   value: _selectedMiniFinca,
+                    //   items: _dropDownMenuItemsMiniFincas,
+                    //   isExpanded: true,
+                    //   onChanged: changedDropDownItemMiniFincsa,
+                    // )
                   ],
                 ),
               ),
@@ -230,12 +292,37 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     new Text("Secciones:"),
-                    new DropdownButton(
-                      value: _selectedMiniFincaSeccion,
-                      items: _dropDownMenuItemsMiniFincasSecciones,
-                      isExpanded: true,
-                      onChanged: changedDropDownItemMiniFincsaSecciones,
-                    )
+                    FutureBuilder<List<SeccionMiniFinca>>(
+                future: _fetchSeccionMiniFincas(_currentMiniFinca == null ? '1' : _currentMiniFinca.id.toString()),
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<SeccionMiniFinca>> snapshot) {
+                      switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Center(child: CircularProgressIndicator());
+              default:
+                return new DropdownButton<SeccionMiniFinca>(
+                    items: snapshot.data
+                        .map((seccion) => DropdownMenuItem<SeccionMiniFinca>(
+                              child: Text(seccion.seccion_mini_finca),
+                              value: seccion,
+                            ))
+                        .toList(),
+                    onChanged: (SeccionMiniFinca value) {
+                      setState(() {
+                        _currentSeccionMiniFinca = value;
+                      });
+                    },
+                    isExpanded: true,
+                    //value: _currentMiniFinca,
+                    hint: _currentSeccionMiniFinca== null ? Text("Seleccione una seccion") : Text(_currentSeccionMiniFinca.seccion_mini_finca)
+                  );
+                }}),
+                    // new DropdownButton(
+                    //   value: _selectedMiniFincaSeccion,
+                    //   items: _dropDownMenuItemsMiniFincasSecciones,
+                    //   isExpanded: true,
+                    //   onChanged: changedDropDownItemMiniFincsaSecciones,
+                    // )
                   ],
                 ),
               ),
@@ -643,10 +730,10 @@ class RegistrarAereoState extends State<RegistrarAereo> {
 
                       // ViajeAereo nuevoViaje = new ViajeAereo(
                       //     numero_viaje: numeroViajeController.text,
-                      //     aerista: inputAeristaController.text.substring(0, 1),
+                      //     aerista: idAerista.toString(),
                       //     created_at: horaSeleccionada,
-                      //     mini_finca: _selectedMiniFinca,
-                      //     seccion_mini_finca: _selectedMiniFincaSeccion,
+                      //     // mini_finca: _selectedMiniFinca,
+                      //     seccion_mini_finca: _currentSeccionMiniFinca.id.toString(),
                       //     amarillo: conteoCintaAmarilla.toString(),
                       //     negro: conteoCintaNegra.toString(),
                       //     rojo: conteoCintaRoja.toString(),
