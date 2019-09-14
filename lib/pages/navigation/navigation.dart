@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sga/pages/mostrar_viajes/mostrar_todos.dart';
 import '../profile_fragment/profile_fragment.dart';
 import '../registrar_aereo/registrar_aereo_fragment.dart';
 
@@ -12,6 +13,7 @@ class Navigation extends StatefulWidget {
   final drawerItems = [
     new DrawerItem("Perfil", Icons.arrow_forward),
     new DrawerItem("Registrar Aéreo", Icons.arrow_forward),
+    new DrawerItem("Mostrar Todos Los Viajes", Icons.arrow_forward)
     // new DrawerItem("Sockets", Icons.info)
   ];
 
@@ -30,6 +32,8 @@ class NavigationState extends State<Navigation> {
         return new ProfileFragment();
       case 1:
         return new RegistrarAereo();
+      case 2: 
+        return new MostrarTodosViajes();
       // case 2:
       //   return new ThirdFragment();
 

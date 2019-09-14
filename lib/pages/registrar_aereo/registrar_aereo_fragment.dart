@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'clases/SeccionMiniFinca.dart';
 import 'clases/MiniFincas.dart';
 import 'package:http/http.dart' as http;
 import 'clases/viaje_aereo.dart';
 import 'clases/Aerista.dart';
+import '../../API/api.dart';
 
 class RegistrarAereo extends StatefulWidget {
   @override
@@ -18,7 +20,10 @@ class RegistrarAereo extends StatefulWidget {
 }
 
 class RegistrarAereoState extends State<RegistrarAereo> {
-  static final urlApiServer = 'http://192.168.1.9:3000/aereos/add';
+
+  bool _saving = false;
+
+  static final urlApiServer = baseUrl + '/aereos/add';
   final _formKey = GlobalKey<FormState>();
 
   RegistrarAereoState();
@@ -58,7 +63,8 @@ class RegistrarAereoState extends State<RegistrarAereo> {
   MiniFincas _currentMiniFinca;
 
   Future<List<MiniFincas>> _fetchMiniFincas() async {
-    var response = await http.get('http://192.168.1.9:3000/minifincas/list');
+    
+    var response = await http.get(baseUrl + '/minifincas/list');
     if (response.statusCode == 200) {
       final items = json.decode(response.body);
       var miniFincasJson = items['miniFincas'] as List;
@@ -78,7 +84,7 @@ class RegistrarAereoState extends State<RegistrarAereo> {
   Future<List<SeccionMiniFinca>> _fetchSeccionMiniFincas(String filter) async {
     var map = new Map<String, dynamic>();
     map["filter"] = filter;
-    var response = await http.post('http://192.168.1.9:3000/seccionesmf/listfilter', body: map);
+    var response = await http.post(baseUrl + '/seccionesmf/listfilter', body: map);
     if (response.statusCode == 200) {
       final items = json.decode(response.body);
       var miniFincasJson = items['secciones'] as List;
@@ -86,6 +92,11 @@ class RegistrarAereoState extends State<RegistrarAereo> {
         return SeccionMiniFinca.fromJson(json);
       }).toList();
       // _currentSeccionMiniFinca = listOfSeccionMiniFincas[0];
+
+      if(_currentSeccionMiniFinca == null){
+        _currentSeccionMiniFinca = listOfSeccionMiniFincas[0];
+      }
+
       return listOfSeccionMiniFincas;
     } else {
       throw Exception('Error de conexion de red');
@@ -144,9 +155,27 @@ class RegistrarAereoState extends State<RegistrarAereo> {
           await client.post(Uri.encodeFull(url), body: body).whenComplete(() {
         client.close();
       });
+
+      setState(() {
+        _saving = false;
+      });
+
       print(response.body);
+      if(response.body == 'ok'){
+         _viajeGuardadoSB(context);
+      }else{
+        _errorAlGuardarSB(context);
+      }
+      
     } catch (e) {
+
+      setState(() {
+        _saving = false;
+      });
+
       print("ocurrio un error: " + e.toString());
+      _errorAlGuardarSB(context);
+      
     }
   }
 
@@ -176,12 +205,33 @@ class RegistrarAereoState extends State<RegistrarAereo> {
     horaSeleccionada = now.toString();
   }
 
+  _viajeGuardadoSB(context) {
+    final snackBar = SnackBar(
+            content: Text('Viaje Guardado'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2),
+          );
+
+          Scaffold.of(context).showSnackBar(snackBar);
+  }
+
+  _errorAlGuardarSB(context) {
+    final snackBar = SnackBar(
+            content: Text('Error'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          );
+
+          Scaffold.of(context).showSnackBar(snackBar);
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
 
     return new Scaffold(
-      body: Container(
+      body: ModalProgressHUD(
+        child: Container(
         padding: EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
@@ -269,6 +319,7 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                     onChanged: (MiniFincas value) {
                       setState(() {
                         _currentMiniFinca = value;
+                        _currentSeccionMiniFinca = null;
                       });
                     },
                     isExpanded: true,
@@ -296,8 +347,12 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                 future: _fetchSeccionMiniFincas(_currentMiniFinca == null ? '1' : _currentMiniFinca.id.toString()),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<SeccionMiniFinca>> snapshot) {
+                      if (!snapshot.hasData) return CircularProgressIndicator();
+                      if(_currentMiniFinca == null){
+                        return Text("Seleccione una mini finca");
+                      }
                       switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
+              case ConnectionState.active:
                 return Center(child: CircularProgressIndicator());
               default:
                 return new DropdownButton<SeccionMiniFinca>(
@@ -314,7 +369,8 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                     },
                     isExpanded: true,
                     //value: _currentMiniFinca,
-                    hint: _currentSeccionMiniFinca== null ? Text("Seleccione una seccion") : Text(_currentSeccionMiniFinca.seccion_mini_finca)
+                    hint: _currentSeccionMiniFinca== null ? Center(child: CircularProgressIndicator()) : Text(_currentSeccionMiniFinca.seccion_mini_finca)
+                    // hint: Text(_currentSeccionMiniFinca.seccion_mini_finca)
                   );
                 }}),
                     // new DropdownButton(
@@ -724,26 +780,31 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   ),
                   onPressed: () {
                     // print('el aerista es   ' + inputAeristaController.text.substring(0,1));
-                    print("el id del aerista es: " + idAerista.toString());
+                    // print("el id del aerista es: " + idAerista.toString());
+
                     if (_formKey.currentState.validate()) {
-                      // print("enviando al server");
+                      print("enviando al server");
 
-                      // ViajeAereo nuevoViaje = new ViajeAereo(
-                      //     numero_viaje: numeroViajeController.text,
-                      //     aerista: idAerista.toString(),
-                      //     created_at: horaSeleccionada,
-                      //     // mini_finca: _selectedMiniFinca,
-                      //     seccion_mini_finca: _currentSeccionMiniFinca.id.toString(),
-                      //     amarillo: conteoCintaAmarilla.toString(),
-                      //     negro: conteoCintaNegra.toString(),
-                      //     rojo: conteoCintaRoja.toString(),
-                      //     verde: conteoCintaVerde.toString(),
-                      //     morado: conteoCintaMorada.toString(),
-                      //     cafe: conteoCintaCafe.toString(),
-                      //     naranja: conteoCintaNaranja.toString(),
-                      //     azul: conteoCintaAzul.toString());
+                      setState(() {
+                        _saving = true;
+                      });
 
-                      // createViajeAereo(urlApiServer, body: nuevoViaje.toMap());
+                      ViajeAereo nuevoViaje = new ViajeAereo(
+                          numero_viaje: numeroViajeController.text,
+                          id_aerista: idAerista.toString(),
+                          created_at: horaSeleccionada,
+                          id_mini_finca: _currentMiniFinca.id.toString(),
+                          id_seccion_mini_finca: _currentSeccionMiniFinca.id.toString(),
+                          amarillo: conteoCintaAmarilla.toString(),
+                          negro: conteoCintaNegra.toString(),
+                          rojo: conteoCintaRoja.toString(),
+                          verde: conteoCintaVerde.toString(),
+                          morado: conteoCintaMorada.toString(),
+                          cafe: conteoCintaCafe.toString(),
+                          naranja: conteoCintaNaranja.toString(),
+                          azul: conteoCintaAzul.toString());
+
+                      createViajeAereo(urlApiServer, body: nuevoViaje.toMap());
                     }
                   },
                 ),
@@ -753,6 +814,8 @@ class RegistrarAereoState extends State<RegistrarAereo> {
           ),
         ),
       ),
+        inAsyncCall: _saving,
+      )
     );
   }
 }

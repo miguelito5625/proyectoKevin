@@ -1,9 +1,9 @@
 class ViajeAereo {
   final String numero_viaje;
-  final String aerista;
+  final String id_aerista;
   final String created_at;
-  final String mini_finca;
-  final String seccion_mini_finca;
+  final String id_mini_finca;
+  final String id_seccion_mini_finca;
   final String amarillo;
   final String negro;
   final String rojo;
@@ -14,16 +14,16 @@ class ViajeAereo {
   final String azul;
 
 
-  ViajeAereo({this.numero_viaje,this.aerista, this.created_at, this.mini_finca, this.seccion_mini_finca, this.amarillo, this.negro,
+  ViajeAereo({this.numero_viaje,this.id_aerista, this.created_at, this.id_mini_finca, this.id_seccion_mini_finca, this.amarillo, this.negro,
   this.rojo, this.verde, this.morado, this.cafe, this.naranja, this.azul});
 
   factory ViajeAereo.fromJson(Map<String, dynamic> json) {
     return ViajeAereo(
       numero_viaje: json['numero_viaje'],
-      aerista: json['aerista'],
+      id_aerista: json['id_aerista'],
       created_at: json['created_at'],
-      mini_finca: json['mini_finca'],
-      seccion_mini_finca: json['seccion_mini_finca'],
+      id_mini_finca: json['id_mini_finca'],
+      id_seccion_mini_finca: json['id_seccion_mini_finca'],
       amarillo: json['amarillo'],
       negro: json['negro'],
       rojo: json['rojo'],
@@ -38,10 +38,10 @@ class ViajeAereo {
   Map toMap() {
     var map = new Map<String, dynamic>();
     map["numero_viaje"] = numero_viaje;
-    map["aerista"] = aerista;
+    map["id_aerista"] = id_aerista;
     map["created_at"] = created_at;
-    map["mini_finca"] = mini_finca;
-    map["seccion_mini_finca"] = seccion_mini_finca;
+    map["id_mini_finca"] = id_mini_finca;
+    map["id_seccion_mini_finca"] = id_seccion_mini_finca;
     map["amarillo"] = amarillo;
     map["negro"] = negro;
     map["rojo"] = rojo;
