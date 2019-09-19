@@ -62,7 +62,7 @@ class RegistrarAereoState extends State<RegistrarAereo> {
 
   MiniFincas _currentMiniFinca;
 
-  Future<List<MiniFincas>> _fetchMiniFincas() async {
+  Future<List<MiniFincas>> _obtenerMiniFincas() async {
     
     var response = await http.get(baseUrl + '/minifincas/list');
     if (response.statusCode == 200) {
@@ -81,7 +81,7 @@ class RegistrarAereoState extends State<RegistrarAereo> {
 
   SeccionMiniFinca _currentSeccionMiniFinca;
 
-  Future<List<SeccionMiniFinca>> _fetchSeccionMiniFincas(String filter) async {
+  Future<List<SeccionMiniFinca>> _obtenerSeccionesMiniFincas(String filter) async {
     var map = new Map<String, dynamic>();
     map["filter"] = filter;
     var response = await http.post(baseUrl + '/seccionesmf/listfilter', body: map);
@@ -305,7 +305,7 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   children: <Widget>[
                     new Text("Mini Fincas:"),
                     FutureBuilder<List<MiniFincas>>(
-                future: _fetchMiniFincas(),
+                future: _obtenerMiniFincas(),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<MiniFincas>> snapshot) {
                   if (!snapshot.hasData) return CircularProgressIndicator();
@@ -344,7 +344,7 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   children: <Widget>[
                     new Text("Secciones:"),
                     FutureBuilder<List<SeccionMiniFinca>>(
-                future: _fetchSeccionMiniFincas(_currentMiniFinca == null ? '1' : _currentMiniFinca.id.toString()),
+                future: _obtenerSeccionesMiniFincas(_currentMiniFinca == null ? '1' : _currentMiniFinca.id.toString()),
                 builder: (BuildContext context,
                     AsyncSnapshot<List<SeccionMiniFinca>> snapshot) {
                       if (!snapshot.hasData) return CircularProgressIndicator();

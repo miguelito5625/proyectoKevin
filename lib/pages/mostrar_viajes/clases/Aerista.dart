@@ -31,7 +31,7 @@ class AeristasViewModel {
     try {
       aeristas = new List<String>();
       arrayAeristas = [];
-      final jsonString = await http.post(baseUrl + "/aerista/listfilter", body: map);
+      final jsonString = await http.post(baseUrl +"/aerista/listfilter", body: map);
       Map parsedJson = json.decode(jsonString.body);
       var aeristasJson = parsedJson['Aeristas'] as List;
       for (int i = 0; i < aeristasJson.length; i++) {
