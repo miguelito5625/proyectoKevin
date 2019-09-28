@@ -255,9 +255,13 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   return AeristasViewModel.aeristas;
                 },
                 itemBuilder: (context, suggestion) {
-                  return ListTile(
+                  return Card(
+                    child: Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: ListTile(
                     title: Text(suggestion),
-                    
+                  ),
+                    ),
                   );
                 },
                 transitionBuilder: (context, suggestionsBox, controller) {
@@ -395,6 +399,7 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                           date.timeZoneOffset.inHours.toString());
                     }, onConfirm: (date) {
                       // print('confirm $date');
+                      print(date.toString());
                       horaSeleccionada = date.toString();
                       String hora = formatDate(date, [hh, ':', nn, ' ', am]);
                       horaAereoController.text = hora;
@@ -590,6 +595,8 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   ],
                 ),
               ),
+
+
               Padding(
                 padding: EdgeInsets.only(top: 10.0),
                 child: Row(
@@ -680,6 +687,8 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   ],
                 ),
               ),
+
+
               Padding(
                 padding: EdgeInsets.only(top: 10.0),
                 child: Row(
@@ -769,6 +778,9 @@ class RegistrarAereoState extends State<RegistrarAereo> {
                   ],
                 ),
               ),
+
+
+
               Container(
                 width: screenSize.width,
                 height: 50.0,

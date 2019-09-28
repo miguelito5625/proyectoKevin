@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sga/pages/mostrar_viajes/mostrar_todos.dart';
+import 'package:sga/pages/resultados_cintas/pagina_menu_abajo.dart';
+import 'package:sga/pages/resultados_cintas/resultados.dart';
+import 'package:sga/streambuilder/prueba1stream.dart';
 import '../profile_fragment/profile_fragment.dart';
 import '../registrar_aereo/registrar_aereo_fragment.dart';
 
@@ -11,9 +14,11 @@ class DrawerItem {
 
 class Navigation extends StatefulWidget {
   final drawerItems = [
-    new DrawerItem("Perfil", Icons.arrow_forward),
-    new DrawerItem("Registrar Aéreo", Icons.arrow_forward),
-    new DrawerItem("Mostrar Todos Los Viajes", Icons.arrow_forward)
+     DrawerItem("Perfil", Icons.arrow_forward),
+     DrawerItem("Registrar Aéreo", Icons.arrow_forward),
+     DrawerItem("Mostrar Todos Los Viajes", Icons.arrow_forward),
+     DrawerItem("Resultados de cintas", Icons.arrow_forward),
+     DrawerItem("StreamBuilder", Icons.arrow_forward)
     // new DrawerItem("Sockets", Icons.info)
   ];
 
@@ -34,6 +39,10 @@ class NavigationState extends State<Navigation> {
         return new RegistrarAereo();
       case 2: 
         return new MostrarTodosViajes();
+      case 3: 
+        return new ResultadosCintas();
+      case 4:
+        return new Prueba1Stream();
       // case 2:
       //   return new ThirdFragment();
 
@@ -53,11 +62,16 @@ class NavigationState extends State<Navigation> {
     for (var i = 0; i < widget.drawerItems.length; i++) {
       var d = widget.drawerItems[i];
       drawerOptions.add(
-        new ListTile(
+        Container(
+          padding: EdgeInsets.all(5.0),
+          child: Card(
+            child: ListTile(
           trailing: new Icon(d.icon),
           title: new Text(d.title),
           selected: i == _selectedDrawerIndex,
           onTap: () => _onSelectItem(i),
+        ),
+          ),
         )
       );
       // Divider(height: 2.0);

@@ -2,6 +2,7 @@
 import 'dart:async';
 // import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:sga/API/api.dart';
 // import 'package:http/http.dart' as http;
 
 class ProfileFragment extends StatefulWidget {
@@ -44,7 +45,7 @@ class ProfileFragmentState extends State<ProfileFragment> {
                     ),
                     SizedBox(height: 45.0),
                     Text(
-                      "Bienvenido al Sistema de Gestión de Aéreos (SGA)",
+                      "Bienvenido al Sistema de Gestión de Aéreos (SGA) IP: " + baseUrl ,
                       style: TextStyle(fontSize: 24.0),
                     )
                     // userField,

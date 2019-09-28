@@ -66,22 +66,8 @@ class MostrarTodosViajesState extends State<MostrarTodosViajes> {
     });
   }
 
-  bool serverOnline = false;
-  verificarConexionAlServidor() async {
-    try {
-      final result = await InternetAddress.lookup('192.168.1.9');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        print('connected');
-        serverOnline = true;
-        setState(() {
-          _obtenerViajes();
-        });
-      }
-    } on SocketException catch (_) {
-      print('not connected');
-      serverOnline = false;
-    }
-  }
+  
+  
 
   initState() {
     super.initState();
@@ -140,15 +126,6 @@ class MostrarTodosViajesState extends State<MostrarTodosViajes> {
                   future: _obtenerViajes(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-
-                      const oneSec = const Duration(seconds: 3);
-                      new Timer.periodic(oneSec, (Timer t) async{
-                        await verificarConexionAlServidor();
-                        if(serverOnline == true){
-                          t.cancel();
-                        }
-                      } );
-                      
                       return Center(child: CircularProgressIndicator());
                     }
 
