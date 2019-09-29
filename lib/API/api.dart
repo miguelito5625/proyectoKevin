@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
 
-const baseUrl = "http://192.168.1.9:3000";
+const baseUrl = "http://35.226.107.150:3000";
 
 class API {
 

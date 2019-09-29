@@ -35,6 +35,9 @@ class ResultadosCintasState extends State<ResultadosCintas> {
 
   Future<List<SumaColoresCintas>> _obternerSumasColores() async {
     // var fechas = {'fecha1': fecha1, 'fecha2': fecha2};
+    setState(() {
+      cargando = CircularProgressIndicator();
+    });
     var fechas = {'fecha1': fecha1, 'fecha2': fecha2};
 
     var response;
